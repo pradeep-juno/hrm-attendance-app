@@ -229,7 +229,7 @@ class _ClockOutScreenState extends State<ClockOutScreen> {
                           top: 8,
                           right: 8,
                           child: InkWell(
-                            onTap: controller.removeImage,
+                             onTap: controller.removeImage,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.5),
@@ -253,7 +253,10 @@ class _ClockOutScreenState extends State<ClockOutScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: controller.submitClockIn,
+                      onPressed: () {
+                        controller.clockOutNow(); // Set the current time
+                        controller.submitClockOut(); // Submit clock out data
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey.shade100,
                         foregroundColor: Colors.black,

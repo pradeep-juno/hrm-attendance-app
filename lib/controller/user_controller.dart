@@ -133,6 +133,7 @@ class UserController extends GetxController {
   }
 
 
+
   validateFields(BuildContext context) {
     if (userNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

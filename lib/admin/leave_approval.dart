@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hrm_attendance_proj/admin/dashboard_screen.dart';
 import 'package:hrm_attendance_proj/admin/settings_screen.dart';
-import 'package:hrm_attendance_proj/navbar/bottom_nav_bar.dart';
 import 'package:hrm_attendance_proj/router/app_router.dart';
 
 import '../controller/leave_Controler.dart';
@@ -34,6 +33,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
   final LeaveController leaveController = Get.put(LeaveController());
 
   String statusFilter = 'Pending';
+
   List<String> statuses = ['Pending', 'Approved', 'Rejected'];
 
   @override
@@ -50,7 +50,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
+             DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
               child: InkWell
                 (
@@ -183,60 +183,6 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
               }),
             ),
 
-            // Expanded(
-            //    child:Obx(() {
-            //      return ListView.builder(
-            //        itemCount: leaveController.leaveRequests.length,
-            //        itemBuilder: (context, index) {
-            //          final leave = leaveController.leaveRequests[index];
-            //
-            //          return Card(
-            //            child: ListTile(
-            //              title: Text('${leave.userName} - ${leave.leaveType}'),
-            //              subtitle: Column(
-            //                crossAxisAlignment: CrossAxisAlignment.start,
-            //                children: [
-            //                  Text('From: ${leave.startDate.toLocal()}'),
-            //                  Text('To: ${leave.endDate.toLocal()}'),
-            //                  Text('Reason: ${leave.reason}'),
-            //                  Text('Status: ${leave.leaveStatus}'),
-            //                ],
-            //              ),
-            //              trailing: leave.leaveStatus == 'Pending'
-            //                  ? Row(
-            //                mainAxisSize: MainAxisSize.min,
-            //                children: [
-            //                  IconButton(
-            //                    icon: Icon(Icons.check, color: Colors.green),
-            //                    onPressed: () {
-            //                      leaveController.updateLeaveStatus(leave.id, 'Approved');
-            //                    },
-            //                  ),
-            //                  IconButton(
-            //                    icon: Icon(Icons.close, color: Colors.red),
-            //                    onPressed: () {
-            //                      leaveController.updateLeaveStatus(leave.id, 'Rejected');
-            //                    },
-            //                  ),
-            //                ],
-            //              )
-            //                  : Text(
-            //                leave.leaveStatus,
-            //                style: TextStyle(
-            //                  color: leave.leaveStatus == 'Approved'
-            //                      ? Colors.green
-            //                      : Colors.red,
-            //                  fontWeight: FontWeight.bold,
-            //                ),
-            //              ),
-            //            ),
-            //          );
-            //        },
-            //      );
-            //    })
-            //
-            //
-            // ),
           ],
         ),
       ),

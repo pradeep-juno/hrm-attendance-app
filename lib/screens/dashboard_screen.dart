@@ -310,16 +310,22 @@ Future<void> _loadUserData() async {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                     Expanded(child:  buildLeaveBalance(
-                       imagePath: "assets/icons/annual leave.png",
-                       count: "04/12",
-                       title: AppConstants.annualLeave,
-                       color: AppColors.annualLeaveColor,
-                       onTap: () {
-                         print("Annual Leave tapped");
-                         // Navigate or perform other actions
-                       },
-                     ),),
+                     Expanded(child:  Obx(() {
+                       if (leaveController.annualLeaveCount.value == '0/12' && leaveController.leaveRequests.isEmpty) {
+                         return CircularProgressIndicator(); // or any placeholder
+                       } else {
+                         return buildLeaveBalance(
+                           imagePath: "assets/icons/annual leave.png",
+                           count: leaveController.annualLeaveCount.value,
+                           title: AppConstants.annualLeave,
+                           color: AppColors.annualLeaveColor,
+                           onTap: () {
+                             print("Annual Leave tapped");
+                           },
+                         );
+                       }
+                     }),
+                         ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: buildLeaveBalance(

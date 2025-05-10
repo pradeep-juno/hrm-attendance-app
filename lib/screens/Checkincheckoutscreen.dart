@@ -14,8 +14,9 @@ class Checkincheckoutscreen extends StatefulWidget {
 }
 
 class _CheckincheckoutscreenState extends State<Checkincheckoutscreen> {
-
-  final ClockInClockOutController clockInClockcontroller = Get.put(ClockInClockOutController());
+  final ClockInClockOutController clockInClockOutcontroller = Get.put(
+    ClockInClockOutController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +143,7 @@ class _CheckincheckoutscreenState extends State<Checkincheckoutscreen> {
 
                 Expanded(
                   child: ListView.builder(
-                    itemCount: 10,
+                      itemCount: 10,
                     itemBuilder: (context, index) {
                       double screenWidth = MediaQuery.of(context).size.width;
                       return Container(
@@ -235,30 +236,56 @@ class _CheckincheckoutscreenState extends State<Checkincheckoutscreen> {
                                         MainAxisAlignment.spaceAround,
                                     children: [
                                       Obx(() {
-                                        final time = clockInClockcontroller.clockInTime.value;
+                                        final time =
+                                            clockInClockOutcontroller
+                                                .clockInTime
+                                                .value;
 
-                                        final formattedTime = time != null
-                                            ? DateFormat('hh:mm a').format(time)
+                                        final formattedTime =
+                                            time != null
+                                                ? DateFormat(
+                                                  'hh:mm a',
+                                                ).format(time)
+                                                : "Not In";
+
+                                        return Text(
+                                          formattedTime,
+                                          style: TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 14,
+                                            // Match the previous size
+                                            color: Color(
+                                              0xFF00156A,
+                                            ), // Match the previous color
+                                          ),
+                                        );
+                                      }),
+
+                                      Obx(() {
+                                        final time =
+                                            clockInClockOutcontroller
+                                                .clockInTime
+                                                .value;
+
+                                        final formattedTime =
+                                        time != null
+                                            ? DateFormat(
+                                          'hh:mm a',
+                                        ).format(time)
                                             : "Not In";
 
                                         return Text(
                                           formattedTime,
                                           style: TextStyle(
                                             fontFamily: 'Montserrat',
-                                            fontSize: 14, // Match the previous size
-                                            color: Color(0xFF00156A), // Match the previous color
+                                            fontSize: 14,
+                                            // Match the previous size
+                                            color: Color(
+                                              0xFF00156A,
+                                            ), // Match the previous color
                                           ),
                                         );
                                       }),
-
-                                      Text(
-                                        "05.30 PM",
-                                        style: TextStyle(
-                                          fontFamily: 'Montserrat',
-                                          fontSize: 14,
-                                          color: Color(0xFF00156A),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                   SizedBox(height: 4),
@@ -273,7 +300,9 @@ class _CheckincheckoutscreenState extends State<Checkincheckoutscreen> {
                                       Expanded(
                                         child: Obx(() {
                                           return Text(
-                                            clockInClockcontroller.address.value,
+                                            clockInClockOutcontroller
+                                                .address
+                                                .value,
                                             style: TextStyle(
                                               fontFamily: 'Montserrat',
                                               fontSize: 14,
@@ -282,7 +311,6 @@ class _CheckincheckoutscreenState extends State<Checkincheckoutscreen> {
                                             overflow: TextOverflow.ellipsis,
                                           );
                                         }),
-
                                       ),
                                     ],
                                   ),

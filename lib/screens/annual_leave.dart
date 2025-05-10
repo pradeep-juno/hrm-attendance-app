@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hrm_attendance_proj/controller/leave_Controler.dart';
 import 'package:hrm_attendance_proj/router/app_router.dart';
+import 'package:intl/intl.dart';
 
 import '../utils/app_colors.dart';
 
@@ -13,67 +15,17 @@ class AnnualLeave extends StatefulWidget {
 
 class _AnnualLeaveState extends State<AnnualLeave> {
 
-  final List<Map<String, dynamic>> leaveData = [
+  final LeaveController leaveController = Get.put(LeaveController());
 
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of Cold',
-      'days': '2 Days',
-      'status': 'Pending',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Approved',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Pending',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Rejected',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Rejected',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Rejected',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Approved',
-    },
-    {
-      'date': '14 Jan',
-      'type': 'Annual Leave',
-      'description': 'This Leave Is Taken Due To Symptoms Of fever',
-      'days': '2 Days',
-      'status': 'Pending',
-    },
-
-
-  ];
+  Color _getStatusColor(String status) {
+    if (status == 'Approved') {
+      return Colors.green; // Green for Approved
+    } else if (status == 'Rejected') {
+      return Colors.red; // Red for Rejected
+    } else {
+      return Colors.orange; // Black for Pending (or initial state)
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,97 +80,154 @@ class _AnnualLeaveState extends State<AnnualLeave> {
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: leaveData.length,
-                    itemBuilder: (context, index) {
-                      final item = leaveData[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        color: AppColors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height : 80,
-                                width: 62,
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.annualLeaveColor,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    item['date'],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                  child: Obx(() {
+
+                    final annualLeaves = leaveController.leaveRequests
+                        .where((item) => item.leaveType == 'Annual Leave')
+                        .toList();
+
+
+                    if (leaveController.leaveRequests.isEmpty) {
+                      return Center(
+                        child: Image.asset("assets/images/no_data.jpg"),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: annualLeaves.length,
+                      itemBuilder: (context, index) {
+                        final item = annualLeaves[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          color: AppColors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 80,
+                                  width: 62,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.annualLeaveColor,  // Adjusted color for this list
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '${item.leaveCreatedDate.day}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Text(
+                                          DateFormat('MMMM').format(item.startDate), // Full month name
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.leaveType,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item.reason,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "${DateFormat('d MMMM, y').format(item.startDate)} - ${DateFormat('d MMMM, y').format(item.endDate)}",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      item['type'],
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
+                                    Row(
+                                      children: [
+                                        if (item.totalDays > 0)
+                                          Text(
+                                            '${item.totalDays} ${item.totalDays == 1 ? 'Day' : 'Days'}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        if (item.totalDays > 0 && item.offDayLeaveDuration > 0)
+                                          const Text(
+                                            '\t', // Add 'and' if both leave and permission exist
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        if (item.offDayLeaveDuration > 0)
+                                          Text(
+                                            '${item.offDayLeaveDuration} hrs Permission',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 20),
                                     Text(
-                                      "${item['description']} More..",
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "Jan 14 - 15, 2024",
+                                      item.leaveStatus.isEmpty
+                                          ? 'Pending'
+                                          : item.leaveStatus, // Default to 'Pending' if leaveStatus is empty
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Colors.grey.shade600,
+                                        color: _getStatusColor(item.leaveStatus), // Use the helper function to get color dynamically
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    item['days'],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    item['status'],
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.annualLeaveColor,
-                                      fontWeight: FontWeight.bold,
-                                    )
-                                  )
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    );
+                  }),
+
                 ),
                 const SizedBox(height: 12),
                 SizedBox(

@@ -1,3 +1,5 @@
+import 'app_colors.dart';
+
 class AppConstants {
 
  //Login Screen
@@ -92,6 +94,11 @@ static const adminId = "eCTBM5OBrzm6p4Ac20W3";
 static const collectionAdmin = "mnxadmin";
 
 static const collectionUser = "user";
+
+
+
+
+
 
 
 }

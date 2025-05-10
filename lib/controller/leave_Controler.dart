@@ -9,6 +9,8 @@ class LeaveController extends GetxController {
   final firebaseFirestore = FirebaseFirestore.instance;
   TextEditingController reasonController = TextEditingController();
 
+
+  var annualLeaveCount = '0/12'.obs;
   // Observable variables for leave request form
   var selectedLeaveType = ''.obs; // You might still need this for record-keeping
   var startDate = DateTime.now().obs;
@@ -18,6 +20,7 @@ class LeaveController extends GetxController {
   var totalLeaveDays = 0.obs;
   var leaveCreatedAt = ''.obs;
   var leaveStatus = ''.obs;
+
 
 
 
@@ -66,6 +69,8 @@ class LeaveController extends GetxController {
     totalLeaveDays.value =
         endDate.value.difference(startDate.value).inDays + 1;
   }
+
+
 
   // Validation method to check if the leave request form is filled correctly
   bool _validateForm() {
@@ -145,6 +150,26 @@ class LeaveController extends GetxController {
     totalLeaveDays.value = 0;
   }
 
+  // Method to count the annual leave days taken
+  Future<void> getAnnualLeaveCount() async {
+    // Filter the leaveRequests to find annual leave with "approved" status
+    final approvedAnnualLeaveRequests = leaveRequests.where((leave) {
+      return leave.leaveType == 'Annual Leave' && leave.leaveStatus == 'Approved';
+    }).toList();
+
+    // Calculate the total leave days taken for annual leave
+    int totalAnnualLeaveDays = approvedAnnualLeaveRequests.fold(0, (sum, leave) {
+      return sum + leave.totalDays;
+    });
+
+    // Calculate total annual leave available (e.g., 12 days per year)
+    int totalAnnualLeaveAvailable = 12; // You can fetch this dynamically if needed
+
+    // Set the count in the observable variable
+    annualLeaveCount.value = '$totalAnnualLeaveDays/$totalAnnualLeaveAvailable';
+  }
+
+
   // Method to fetch leave requests from Firestore
   Future<void> fetchLeaveRequests() async {
     try {
@@ -159,12 +184,14 @@ class LeaveController extends GetxController {
 
       }).toList();
 
-      leaveRequests.value = leaveData; // Assign fetched data to observable list
+      leaveRequests.value = leaveData;
+      getAnnualLeaveCount(); // Assign fetched data to observable list
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch leave requests: $e',
           snackPosition: SnackPosition.BOTTOM);
     }
   }
+
   Future<void> updateLeaveStatus(String docId, String newStatus) async {
     try {
       await firebaseFirestore
@@ -184,5 +211,7 @@ class LeaveController extends GetxController {
           snackPosition: SnackPosition.BOTTOM);
     }
   }
+
+
 
 }
