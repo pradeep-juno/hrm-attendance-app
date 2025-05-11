@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hrm_attendance_proj/controller/leave_Controler.dart';
 import 'package:hrm_attendance_proj/controller/login_controller.dart';
-import 'package:hrm_attendance_proj/controller/''user_controller.dart';
 import 'package:hrm_attendance_proj/utils/functions.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,23 +24,33 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final LeaveController leaveController = Get.put(LeaveController());
 LoginController loginController = Get.put(LoginController());
-final UserController userController =Get.put(UserController());
 final ClockInClockOutController clockInClockcontroller = Get.put(ClockInClockOutController());
 
+  String? userName;
+  String? position;
+  String uId = '';
 
-@override
+  @override
 void initState() {
   super.initState();
   _loadUserData();
 
 }
 
-Future<void> _loadUserData() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String id = prefs.getString('id') ?? 'Not Available';
-  print("clockId : $id");
-  clockInClockcontroller.listenClockDataUpdates(context, id);
-}
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String id = prefs.getString('id') ?? 'Not Available';
+    uId = prefs.getString('uId') ?? 'Not Available';
+    userName = prefs.getString('userName') ?? 'No Name';
+    position = prefs.getString('position') ?? 'No Position';
+    print("clockId : $id");
+    print("uId: $uId");
+    print("Name: $userName, Position: $position");
+
+    setState(() {}); // To rebuild UI with new values
+
+    clockInClockcontroller.listenClockDataUpdates(context, id);
+  }
 
 
   @override
@@ -88,27 +97,18 @@ Future<void> _loadUserData() async {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  Obx(() {
-
-                    if (userController.userList.isEmpty) {
-                      return const Text("User name and position null...");
-                    }
-                     final user = userController.userList.first;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        widgetBuildText("Hi ${user.userName}", 18, FontWeight.bold, Colors.black),
-                          SizedBox(height: 10),
-                          widgetBuildText(user.position, 14, FontWeight.normal, Colors.grey),
-                      ],
-                    );
-                  }
-                  ),
+                 Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widgetBuildText("Hi ${userName ?? 'User'}", 18, FontWeight.bold, Colors.black),
+                  const SizedBox(height: 10),
+                  widgetBuildText(position ?? 'Position', 14, FontWeight.normal, Colors.grey),
+                ],
+              ),
 
 
 
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -310,63 +310,79 @@ Future<void> _loadUserData() async {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                     Expanded(child:  Obx(() {
-                       if (leaveController.annualLeaveCount.value == '0/12' && leaveController.leaveRequests.isEmpty) {
-                         return CircularProgressIndicator(); // or any placeholder
-                       } else {
-                         return buildLeaveBalance(
-                           imagePath: "assets/icons/annual leave.png",
-                           count: leaveController.annualLeaveCount.value,
-                           title: AppConstants.annualLeave,
-                           color: AppColors.annualLeaveColor,
-                           onTap: () {
-                             print("Annual Leave tapped");
-                           },
-                         );
-                       }
-                     }),
-                         ),
-                      const SizedBox(width: 12),
                       Expanded(
-                        child: buildLeaveBalance(
-                          imagePath: "assets/icons/sick leave.png",
-                          count: "05/14",
-                          title: AppConstants.sickLeave,
-                          color: AppColors.sickLeaveColor,
-                          onTap: () {
-                            print("Sick Leave tapped");
-                            // Navigate or perform other actions
-                          },
-                        ),
+                        child: Obx(() {
+                          if (leaveController.annualLeaveCount.value == '0/12' &&
+                              leaveController.leaveRequests.isEmpty) {
+                            return SizedBox.shrink(); // shows nothing
+                          } else {
+                            return buildLeaveBalance(
+                              imagePath: "assets/icons/annual leave.png",
+                              count: leaveController.annualLeaveCount.value,
+                              title: AppConstants.annualLeave,
+                              color: AppColors.annualLeaveColor,
+                              onTap: () {
+                                print("Annual Leave tapped");
+                              },
+                            );
+                          }
+                        }),
+                      ),
+
+                      const SizedBox(width: 12),
+                      Expanded(child:  Obx(() {
+                        if (leaveController.sickLeaveCount.value == '0/14' && leaveController.leaveRequests.isEmpty) {
+                          return SizedBox.shrink(); // or any placeholder
+                        } else {
+                          return buildLeaveBalance(
+                            imagePath: "assets/icons/sick leave.png",
+                            count: leaveController.sickLeaveCount.value,
+                            title: AppConstants.sickLeave,
+                            color: AppColors.sickLeaveColor,
+                            onTap: () {
+                              print("sick Leave tapped");
+                            },
+                          );
+                        }
+                      }),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: buildLeaveBalance(
-                          imagePath: "assets/icons/compensational leave.png",
-                          count: "01/03",
-                          title: AppConstants.compensationalLeave,
-                          color: AppColors.compLeaveColor,
-                          onTap: () {
-                            print("Compensational Leave tapped");
-                            // Navigate or perform other actions
-                          },
-                        ),
+                      Expanded(child:  Obx(() {
+                        if (leaveController.compensationalLeaveCount.value == '0/03' && leaveController.leaveRequests.isEmpty) {
+                          return SizedBox.shrink(); // or any placeholder
+                        } else {
+                          return buildLeaveBalance(
+                            imagePath: "assets/icons/compensational leave.png",
+                            count: leaveController.compensationalLeaveCount.value,
+                            title: AppConstants.compensationalLeave,
+                            color: AppColors.compLeaveColor,
+                            onTap: () {
+                              print("compensational Leave tapped");
+                            },
+                          );
+                        }
+                      }),
                       ),
                     ],
                   ),
                   SizedBox(height: 24),
                   Row(
                     children: [
-                      Expanded(
-                        child: buildLeaveBalance(
-                          imagePath: "assets/icons/unpaid leave.png",
-                          count: "05",
-                          title: AppConstants.unpaidLeave,
-                          color: AppColors.unPaidLeaveColor,
-                          onTap: () {
-                            print("press unpaid leave ");
-                          },
-                        ),
+                      Expanded(child:  Obx(() {
+                        if (leaveController.unpaidLeaveCount.value == '0/05' && leaveController.leaveRequests.isEmpty) {
+                          return SizedBox.shrink(); // or any placeholder
+                        } else {
+                          return buildLeaveBalance(
+                            imagePath: "assets/icons/unpaid leave.png",
+                            count: leaveController.unpaidLeaveCount.value,
+                            title: AppConstants.unpaidLeave,
+                            color: AppColors.unPaidLeaveColor,
+                            onTap: () {
+                              print("unpaid Leave tapped");
+                            },
+                          );
+                        }
+                      }),
                       ),
                       const SizedBox(width: 12),
                       Expanded(child: buildDummyLeaveBalance()),

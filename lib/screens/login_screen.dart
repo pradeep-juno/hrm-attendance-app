@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hrm_attendance_proj/screens/register_screen.dart';
 import 'package:hrm_attendance_proj/utils/constants.dart';
 
 import '../controller/login_controller.dart';
@@ -88,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: TextField(
-                          controller: loginController.usernameController,
+                          controller: loginController.userNameController,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: AppConstants.userName,
@@ -171,6 +173,36 @@ SizedBox(height: 20,),
                       ,
                     ),
                       const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+
+// Don't have an account? Register
+                      Center(
+                        child: RichText(
+                          text: TextSpan(
+                            text: "Don't have an account? ",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Register',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  color: Color(0xFF00156A),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    // Navigate to register screen
+                                   Get.to(RegisterScreen());
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                     ],
                   ),
                 ),

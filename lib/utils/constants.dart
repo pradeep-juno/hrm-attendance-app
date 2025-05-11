@@ -8,6 +8,11 @@ class AppConstants {
   static const goToDashboard = "Go To Dashboard";
   static const userName = "User Name";
   static const password = "Password";
+  static const registerCaps = "REGISTER";
+  static const phoneNo = "Phone No";
+  static const emailId = "Email Id";
+  static const position = "Position";
+  static const register = "Register";
 
   //Onboard Screen
 

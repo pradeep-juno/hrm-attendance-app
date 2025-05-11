@@ -11,6 +11,9 @@ class LeaveController extends GetxController {
 
 
   var annualLeaveCount = '0/12'.obs;
+  var sickLeaveCount = '0/14'.obs;
+  var compensationalLeaveCount = '0/03'.obs;
+  var unpaidLeaveCount = '0/05'.obs;
   // Observable variables for leave request form
   var selectedLeaveType = ''.obs; // You might still need this for record-keeping
   var startDate = DateTime.now().obs;
@@ -91,10 +94,6 @@ class LeaveController extends GetxController {
       Get.snackbar('Validation Error', 'Please enter a reason for leave');
       return false;
     }
-
-    // You might want to add a validation if both leave and permission are submitted,
-    // depending on your application's logic. For now, we allow both.
-
     return true;
   }
 
@@ -169,6 +168,60 @@ class LeaveController extends GetxController {
     annualLeaveCount.value = '$totalAnnualLeaveDays/$totalAnnualLeaveAvailable';
   }
 
+  Future<void> getSickLeaveCount() async {
+    // Filter the leaveRequests to find annual leave with "approved" status
+    final approvedSickLeaveRequests = leaveRequests.where((leave) {
+      return leave.leaveType == 'Sick Leave' && leave.leaveStatus == 'Approved';
+    }).toList();
+
+    // Calculate the total leave days taken for annual leave
+    int totalSickLeaveDays = approvedSickLeaveRequests.fold(0, (sum, leave) {
+      return sum + leave.totalDays;
+    });
+
+    // Calculate total annual leave available (e.g., 12 days per year)
+    int totalSickLeaveAvailable = 14; // You can fetch this dynamically if needed
+
+    // Set the count in the observable variable
+    sickLeaveCount.value = '$totalSickLeaveDays/$totalSickLeaveAvailable';
+  }
+
+  Future<void> getCompensationalLeaveCount() async {
+    // Filter the leaveRequests to find annual leave with "approved" status
+    final approvedCompensationalLeaveRequests = leaveRequests.where((leave) {
+      return leave.leaveType == 'Compensational Leave' && leave.leaveStatus == 'Approved';
+    }).toList();
+
+    // Calculate the total leave days taken for annual leave
+    int totalCompensationalLeaveDays = approvedCompensationalLeaveRequests.fold(0, (sum, leave) {
+      return sum + leave.totalDays;
+    });
+
+    // Calculate total annual leave available (e.g., 12 days per year)
+    int totalCompensationalLeaveAvailable = 03; // You can fetch this dynamically if needed
+
+    // Set the count in the observable variable
+    compensationalLeaveCount.value = '$totalCompensationalLeaveDays/$totalCompensationalLeaveAvailable';
+  }
+
+  Future<void> getUnpaidLeaveCount() async {
+    // Filter the leaveRequests to find annual leave with "approved" status
+    final approvedUnpaidLeaveRequests = leaveRequests.where((leave) {
+      return leave.leaveType == 'Unpaid Leave' && leave.leaveStatus == 'Approved';
+    }).toList();
+
+    // Calculate the total leave days taken for annual leave
+    int totalUnpaidLeaveDays = approvedUnpaidLeaveRequests.fold(0, (sum, leave) {
+      return sum + leave.totalDays;
+    });
+
+    // Calculate total annual leave available (e.g., 12 days per year)
+    int totalUnpaidLeaveAvailable = 05; // You can fetch this dynamically if needed
+
+    // Set the count in the observable variable
+    unpaidLeaveCount.value = '$totalUnpaidLeaveDays/$totalUnpaidLeaveAvailable';
+  }
+
 
   // Method to fetch leave requests from Firestore
   Future<void> fetchLeaveRequests() async {
@@ -185,7 +238,12 @@ class LeaveController extends GetxController {
       }).toList();
 
       leaveRequests.value = leaveData;
-      getAnnualLeaveCount(); // Assign fetched data to observable list
+      getAnnualLeaveCount();
+      getSickLeaveCount();
+      getCompensationalLeaveCount();
+      getUnpaidLeaveCount();
+
+      // Assign fetched data to observable list
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch leave requests: $e',
           snackPosition: SnackPosition.BOTTOM);
