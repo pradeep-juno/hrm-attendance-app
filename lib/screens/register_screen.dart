@@ -151,19 +151,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           width: double.infinity,
                           height: 48,
-                          child: ElevatedButton(
-                            onPressed: () async {
-
-                              loginController.registerUser(context
-                              );
-
-                              // SharedPreferences prefs =
-                              // await SharedPreferences.getInstance();
-                              // await prefs.setBool(
-                              //     'isAttendanceSuccessDone', true);
-
-                              // Get.offAllNamed(AppRouter.MAIN_NAVIGATION);
-                            },
+                          child: Obx(() => ElevatedButton(
+                            onPressed: loginController.isRegistering.value
+                                ? null
+                                : () => loginController.registerUser(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF00156A),
                               elevation: 4,
@@ -171,7 +162,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: Text(
+                            child: loginController.isRegistering.value
+                                ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                                : Text(
                               AppConstants.register,
                               style: GoogleFonts.montserrat(
                                 fontSize: 16,
@@ -179,7 +179,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                          ),
+                          ))
+                          ,
                         ),
                         SizedBox(height: 20,),
                         Center(

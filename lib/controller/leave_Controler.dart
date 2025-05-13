@@ -226,29 +226,33 @@ class LeaveController extends GetxController {
   // Method to fetch leave requests from Firestore
   Future<void> fetchLeaveRequests() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final uId = prefs.getString('uId') ?? '';
+
       final querySnapshot = await firebaseFirestore
           .collection('leaveRequests')
-      .orderBy('leaveCreatedDate', descending: true)
+          .where('uId', isEqualTo: uId)
+          .orderBy('leaveCreatedDate', descending: true)
           .get();
 
-      // Mapping Firestore data to LeaveModel list
       final leaveData = querySnapshot.docs.map((doc) {
         return LeaveModel.fromMap(doc.data(), doc.id);
-
       }).toList();
 
       leaveRequests.value = leaveData;
+
+      // Now update the leave counts based on filtered data
       getAnnualLeaveCount();
       getSickLeaveCount();
       getCompensationalLeaveCount();
       getUnpaidLeaveCount();
 
-      // Assign fetched data to observable list
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch leave requests: $e',
           snackPosition: SnackPosition.BOTTOM);
     }
   }
+
 
   Future<void> updateLeaveStatus(String docId, String newStatus) async {
     try {

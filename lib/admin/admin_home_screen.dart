@@ -13,7 +13,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     return const Scaffold(
       body: Center(
         child: Text(
-          'Hello Admin',
+          'Welcome Admin',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,

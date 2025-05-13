@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:hrm_attendance_proj/navbar/bottom_nav_bar.dart';
 import 'package:hrm_attendance_proj/screens/approval_Queue_Screen.dart';
 import 'package:hrm_attendance_proj/screens/attendance_success_screen.dart';
-
 import 'package:hrm_attendance_proj/screens/dashboard_screen.dart';
 import 'package:hrm_attendance_proj/screens/login_screen.dart';
 import 'package:hrm_attendance_proj/screens/missed_attendence_screen.dart';
@@ -15,7 +14,7 @@ import '../screens/annual_leave.dart';
 
 import '../screens/Checkincheckoutscreen.dart';
 import '../screens/clockIn_Screen.dart';
-import '../screens/clockOut_Screen.dart';
+
 import '../screens/otp_Screen.dart';
 import '../screens/profile/edit_profile_screen.dart';
 import '../screens/leave_screen.dart';
@@ -50,15 +49,6 @@ class AppRouter {
 
 
 
-
-
-
-
-
-
-
-
-
   static var routes = [
 GetPage(name: ONBOARD_SCREEN, page: () => OnBoardScreen(), transition: Transition.fade,),
   GetPage(name: LOGIN_SCREEN, page: () => LoginScreen(),transition: Transition.fade),
@@ -76,23 +66,8 @@ GetPage(name: ONBOARD_SCREEN, page: () => OnBoardScreen(), transition: Transitio
     GetPage(name: TERMS_AND_CONDITIONS ,page: ()=> TermsConditions()),
     GetPage(name: PRIVACY_POLICY ,page: ()=> PrivacyPolicy()),
     GetPage(name: PROFILE_SCREEN, page: ()=> ProfileScreen()),
-    GetPage(name: ADMIN_HOME_SCREEN, page: ()=> AdminHomeScreen()),
-    GetPage(name: CHECK_OUT_SCREEN, page: ()=> ClockOutScreen()),
     GetPage(name: OTP_SCREEN, page: ()=> OtpScreen()),
     GetPage(name: LEAVE_APP, page: ()=> LeaveApp()),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    GetPage(name: ADMIN_HOME_SCREEN, page: ()=> AdminHomeScreen()),
   ];
 }

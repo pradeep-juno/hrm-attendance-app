@@ -94,7 +94,6 @@ static const selectLeaveType = "Select Leave Type";
 
 // firebase
 
-static const adminId = "eCTBM5OBrzm6p4Ac20W3";
 
 static const collectionAdmin = "mnxadmin";
 

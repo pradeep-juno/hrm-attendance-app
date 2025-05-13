@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hrm_attendance_proj/router/app_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hrm_attendance_proj/storage_service/storage_service.dart';
 import 'firebase/firebase_options.dart';
 
 Future<void> main() async {
@@ -11,20 +11,17 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userId = prefs.getString('id');
+  String? userId = await UsersStorageService.getUserId();
   bool isLoggedIn = (userId != null && userId.isNotEmpty);
 
-  bool isClockInDone = prefs.getBool('isClockInDone') ?? false;
-  bool isAttendanceSuccessDone = prefs.getBool('isAttendanceSuccessDone') ?? false;
+  bool isClockInDone = await UsersStorageService.getClockInDone();
+  bool isAttendanceSuccessDone = await UsersStorageService.getAttendanceSuccessDone();
 
   String initialRoute;
 
-
   if (!isLoggedIn) {
     initialRoute = AppRouter.ONBOARD_SCREEN;
-  }
-  else if (!isClockInDone) {
+  } else if (!isClockInDone) {
     initialRoute = AppRouter.CLOCK_IN_SCREEN;
   } else if (!isAttendanceSuccessDone) {
     initialRoute = AppRouter.ATTENDANCE_SUCCESS_SCREEN;
@@ -32,11 +29,8 @@ Future<void> main() async {
     initialRoute = AppRouter.MAIN_NAVIGATION;
   }
 
-
   runApp(MyApp(initialRoute: initialRoute));
 }
-
-
 
 class MyApp extends StatelessWidget {
   final String initialRoute;

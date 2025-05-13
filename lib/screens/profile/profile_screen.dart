@@ -7,6 +7,7 @@ import 'package:hrm_attendance_proj/router/app_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../controller/login_controller.dart';
+import '../../storage_service/storage_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/functions.dart';
 
@@ -66,11 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: InkWell(
               onTap: () async {
-                String userId = await SharedPreferences.getInstance()
-                    .then((prefs) => prefs.getString('uId') ?? "");
-
-                loginController.getUserData(userId);
-
+                String userId = await UsersStorageService.getUserId() ?? "";
                 _showEditProfileBottomSheet(context, userId,loginController,profileController);
               },
 
@@ -274,9 +271,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 void _showEditProfileBottomSheet(
     BuildContext context,
     String userId,
-    LoginController loginController,
-    ProfileController profileController,
+    LoginController loginController, ProfileController profileController,
     ) {
+
+  loginController.phoneNoController.text = profileController.phoneNo.value;
+  loginController.emailIdController.text = profileController.emailId.value;
+
   showModalBottomSheet(
     context: context,
     shape: RoundedRectangleBorder(
@@ -319,10 +319,15 @@ void _showEditProfileBottomSheet(
             Center(
               child: GestureDetector(
                 onTap: () async {
-                  await loginController.updateUserProfile(userId);
-                  await profileController.fetchUserData();
+                  await loginController.updateUserProfile(userId); // Call update
+
+                  // Optionally update the ProfileController if needed
+                  profileController.phoneNo.value = loginController.phoneNoController.text;
+                  profileController.emailId.value = loginController.emailIdController.text;
+
                   Navigator.pop(context); // Close bottom sheet
                 },
+
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                   decoration: BoxDecoration(

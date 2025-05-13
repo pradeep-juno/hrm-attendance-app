@@ -6,8 +6,14 @@ import 'package:hrm_attendance_proj/router/app_router.dart';
 import 'package:hrm_attendance_proj/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../storage_service/storage_service.dart';
+
 class LoginController extends GetxController {
   var userList = <UserModel>[].obs;
+
+  var isRegistering = false.obs;
+
+
 
   var userId = ''.obs;
   var uId = ''.obs;
@@ -31,17 +37,45 @@ class LoginController extends GetxController {
       String password = passwordController.text.trim();
 
       try {
-        await isCheckUserData(userName, password, context);
+        bool userFound = await isCheckUserData(userName, password, context);
 
-        // Show "Invalid Credentials" only if both admin and user login failed
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid Credentials'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.blue,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        // If the user is found, we move them to the correct screen
+        if (userFound) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Welcome $userName'),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.blue,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+
+          // Set data in SharedPreferences for the logged-in user
+          await UsersStorageService.saveUserDetails(
+            uId: uId.value,
+            userName: userName,
+            emailId: userEmailId.value,
+            phoneNo: userPhoneNumber.value,
+            position: userDesignation.value,
+          );
+
+          // Set default flags for clock-in and attendance success
+          await UsersStorageService.setClockInDone(false);
+          await UsersStorageService.setAttendanceSuccessDone(false);
+
+          // Proceed to the next screen
+          Get.offNamed(AppRouter.CLOCK_IN_SCREEN);
+        } else {
+          // Invalid credentials, show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid Credentials'),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.blue,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       } catch (e) {
         print("firebase Error $e");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,102 +157,41 @@ class LoginController extends GetxController {
     return true;
   }
 
-  Future<bool> isCheckAdminData(
-    BuildContext context,
-    String userName,
-    String password,
-  ) async {
-    DocumentSnapshot adminSnapshot =
-        await FirebaseFirestore.instance
-            .collection(AppConstants.collectionAdmin)
-            .doc(AppConstants.adminId)
-            .get();
-
-    if (adminSnapshot.exists) {
-      String storedName = adminSnapshot['username']?.toString().trim() ?? '';
-      String storedPassword =
-          adminSnapshot['password']?.toString().trim() ?? '';
-
-      print("Stored UserName: $storedName");
-      print("Stored Password: $storedPassword");
-
-      if (userName.trim() == storedName && password.trim() == storedPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login Successfully'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.blue,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('name', userName);
-        await prefs.setString('password', password);
-
-        getAdminDataFromPreferences();
-        clearController(context);
-        Get.offNamed(AppRouter.ADMIN_HOME_SCREEN);
-        return true;
-      }
-    }
-
-    return false; // Only return false, don't show snack here
-  }
-
-  isCheckUserData(
-    String userName,
-    String password,
-    BuildContext context,
-  ) async {
+  // New user check: This method will check if the user exists and save data if not
+  Future<bool> isCheckUserData(
+      String userName, String password, BuildContext context) async {
     print("UserLogin");
 
-    QuerySnapshot userSnapshot =
-        await FirebaseFirestore.instance
-            .collection(AppConstants.collectionUser)
-            .where('userName', isEqualTo: userName)
-            .where('password', isEqualTo: password)
-            .get();
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection(AppConstants.collectionUser)
+        .where('userName', isEqualTo: userName)
+        .where('password', isEqualTo: password)
+        .get();
 
     if (userSnapshot.docs.isNotEmpty) {
       var userData = userSnapshot.docs.first;
-      String userName = userData['userName'];
-      String staffId = userData['uId'];
+      uId.value = userData['uId'];
+      userName = userData['userName'];
       String position = userData['position'];
       String emailId = userData['emailId'];
       String phoneNo = userData['phoneNo'];
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Welcome $userName'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.blue,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // Set the user data in variables
+      userDesignation.value = position;
+      userEmailId.value = emailId;
+      userPhoneNumber.value = phoneNo;
 
-      await prefs.setString('uId', staffId);
-      await prefs.setString('userName', userName); // e.g. "mind"
-      await prefs.setString('position', position);
-      await prefs.setString('emailId', emailId); // e.g. "mind"
-      await prefs.setString('phoneNo', phoneNo); // e.g. "trainee"
-      await prefs.setBool('isClockInDone', false);
-      await prefs.setBool('isAttendanceSuccessDone', false);
-      await prefs.setString('id', AppConstants.adminId);
-
-      getAdminDataFromPreferences();
-
-      clearController(context);
-      Get.offNamed(AppRouter.CLOCK_IN_SCREEN);
-
-      return true;
+      return true; // Existing user found
+    } else {
+      return false; // User not found, new user
     }
-    return false;
   }
 
   void clearController(BuildContext context) {
-    userNameController.clear();
-    passwordController.clear();
+    registerUserNameController.clear();
+    registerPasswordController.clear();
+    // userNameController.clear();
+    // passwordController.clear();
     emailIdController.clear();
     phoneNoController.clear();
     positionController.clear();
@@ -242,42 +215,63 @@ class LoginController extends GetxController {
   final registerUserNameController = TextEditingController();
   final registerPasswordController = TextEditingController();
 
+  // Register New User method
   Future<void> registerUser(BuildContext context) async {
+    if (isRegistering.value) return;
+
+    isRegistering.value = true;
+
     if (await registerValidateFields(context)) {
-      var docRef =
-          firebaseFirestore.collection(AppConstants.collectionUser).doc();
+      try {
+        var docRef = firebaseFirestore.collection(AppConstants.collectionUser).doc();
+        var userId = docRef.id;
 
-      var userId = docRef.id;
+        var userData = UserModel(
+          uId: userId,
+          userName: registerUserNameController.text.trim(),
+          password: registerPasswordController.text.trim(),
+          emailId: emailIdController.text.trim(),
+          phoneNo: phoneNoController.text.trim(),
+          position: positionController.text.trim(),
+        );
 
-      print("Registering User: ${registerUserNameController.text}");
+        await docRef.set(userData.toMap());
 
-      var userData = UserModel(
-        uId: userId,
-        userName: registerUserNameController.text.trim(),
-        password: registerPasswordController.text.trim(),
-        emailId: emailIdController.text.trim(),
-        phoneNo: phoneNoController.text.trim(),
-        position: positionController.text.trim(),
-      );
+        await UsersStorageService.saveUserDetails(
+          uId: userId,
+          userName: userData.userName,
+          emailId: userData.emailId,
+          phoneNo: userData.phoneNo,
+          position: userData.position,
+        );
 
-      print("UserData: ${userData.toString()}");
+        clearController(context);
+        Get.offAllNamed(AppRouter.LOGIN_SCREEN);
 
-      await docRef.set(userData.toMap());
-
-      clearController(context);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-
-      Get.offAllNamed(AppRouter.LOGIN_SCREEN);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
+
+    isRegistering.value = false;
   }
+
+
 
   registerValidateFields(BuildContext context) {
     if (registerUserNameController.text.isEmpty) {
@@ -360,43 +354,24 @@ class LoginController extends GetxController {
   }
 
 
-  Future<void> getUserData(String userId) async {
-    try {
-      DocumentSnapshot userDoc = await firebaseFirestore
-          .collection(AppConstants.collectionUser)
-          .doc(userId)
-          .get();
-
-      if (userDoc.exists) {
-        var data = userDoc.data() as Map<String, dynamic>;
-
-        userNameController.text = data['userName'] ?? '';
-        emailIdController.text = data['emailId'] ?? '';
-        phoneNoController.text = data['phoneNo'] ?? '';
-
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
-    }
-  }
 
   Future<void> updateUserProfile(String userId) async {
     try {
-      String phone = phoneNoController.text.trim();
-      String email = emailIdController.text.trim();
-
-
-      await firebaseFirestore.collection(AppConstants.collectionUser).doc(userId).update({
-        'phoneNo': phone,
-        'emailId': email,
-
+      await FirebaseFirestore.instance.collection('user').doc(userId).update({
+        'emailId': emailIdController.text.trim(),
+        'phoneNo': phoneNoController.text.trim(),
       });
 
-      Get.snackbar("Success", "Profile updated successfully!");
+      // Optional: show success snackbar
+      Get.snackbar("Success", "Profile updated successfully",
+          snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
-      Get.snackbar("Error", "Failed to update profile: $e");
+      print("Error updating profile: $e");
+      Get.snackbar("Error", "Failed to update profile",
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
+
 
 
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../controller/clockIn_ClockOut_Controller.dart';
 import '../utils/app_colors.dart';
 import '../utils/constants.dart';
 
+
 class ClockInScreen extends StatefulWidget {
-  ClockInScreen({super.key});
+  const ClockInScreen({super.key});
 
   @override
   State<ClockInScreen> createState() => _ClockInScreenState();
@@ -231,11 +231,11 @@ class _ClockInScreenState extends State<ClockInScreen> {
                             onTap: controller.removeImage,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                                 shape: BoxShape.circle,
                               ),
-                              padding: const EdgeInsets.all(6),
-                              child: const Icon(
+                              padding:  EdgeInsets.all(6),
+                              child:  Icon(
                                 Icons.delete,
                                 color: Colors.white,
                                 size: 20,

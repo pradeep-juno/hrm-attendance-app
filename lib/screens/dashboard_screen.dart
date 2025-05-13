@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hrm_attendance_proj/controller/admin_controller.dart';
 import 'package:hrm_attendance_proj/controller/leave_Controler.dart';
 import 'package:hrm_attendance_proj/controller/login_controller.dart';
 import 'package:hrm_attendance_proj/utils/functions.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 import '../controller/clockIn_ClockOut_Controller.dart';
 import '../router/app_router.dart';
 import '../utils/app_colors.dart';
 import '../utils/constants.dart';
-import 'clockOut_Screen.dart';
-import 'notification_screen.dart';
 
+import 'notification_screen.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -25,6 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final LeaveController leaveController = Get.put(LeaveController());
 LoginController loginController = Get.put(LoginController());
 final ClockInClockOutController clockInClockcontroller = Get.put(ClockInClockOutController());
+final AdminMessageController adminMessageController = Get.put(AdminMessageController());
 
   String? userName;
   String? position;
@@ -34,9 +33,7 @@ final ClockInClockOutController clockInClockcontroller = Get.put(ClockInClockOut
 void initState() {
   super.initState();
   _loadUserData();
-
 }
-
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String id = prefs.getString('id') ?? 'Not Available';
@@ -105,9 +102,6 @@ void initState() {
                   widgetBuildText(position ?? 'Position', 14, FontWeight.normal, Colors.grey),
                 ],
               ),
-
-
-
                 const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,7 +152,7 @@ void initState() {
                         Image.asset("assets/icons/clock out 1.png",height: 14,width: 14),
                         InkWell(
                           onTap: () => {
-                            Get.to(ClockOutScreen())
+                            print("Clock out button pressed")
                           },
                           child: Text(
                             AppConstants.clockOut,
@@ -238,11 +232,13 @@ void initState() {
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(left: 6.0),
-                            child: _buildQuickInsightSections(
-                              color: AppColors.blue,
-                              icon: "assets/icons/recent updates.png",
-                              count: "10",
-                              label: AppConstants.recentUpdates,
+                            child: Obx(() =>
+                             _buildQuickInsightSections(
+                                color: AppColors.blue,
+                                icon: "assets/icons/recent updates.png",
+                                count: "${adminMessageController.messages.length}",
+                                label: AppConstants.recentUpdates,
+                              ),
                             ),
                           ),
                         ),

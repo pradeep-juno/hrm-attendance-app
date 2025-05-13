@@ -26,6 +26,8 @@ class ProfileController extends GetxController {
 
     print("User ID: ${uId.value}");
     print("Name: ${userName.value}, Position: ${position.value}");
+
+
   }
 
 
@@ -39,8 +41,6 @@ class ProfileController extends GetxController {
       phoneNo.value = userData['phoneNo'];
     }
   }
-
-
 
 
 
